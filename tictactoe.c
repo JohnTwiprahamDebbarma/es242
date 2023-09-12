@@ -64,7 +64,7 @@ int has_won(board_t board, player_t player)
     }
     return 1;
 
-next_diagonal:
+    next_diagonal:
     for (int i = 0; i < BOARD_SIZE; ++i) {
         if (board[i][BOARD_SIZE-1-i] != player) return 0;
     }
