@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-int gcd(int n, int m)
+long int gcd(int n, int m)
 {
     if (n < m) return gcd(m, n);
 
@@ -34,7 +34,7 @@ int euclid_gcd(int n, int m)
     return n;
 }
 
-int lcm(int n, int m)
+long int lcm(int n, int m)
 {
     return (n/euclid_gcd(n, m))*m;
 }

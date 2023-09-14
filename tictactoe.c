@@ -5,7 +5,7 @@
 
 #define BOARD_SIZE (4)
 
-typedef char player_t; // 'X' or 'O'
+typedef char player_t; // 'X' or 'O'   // To use player_t in place of char for better readability
 typedef char board_t[BOARD_SIZE][BOARD_SIZE]; // 'X' or 'O' or '.'
 
 void init_board(board_t board)
@@ -43,10 +43,10 @@ int has_won(board_t board, player_t player)
     for (int row = 0; row < BOARD_SIZE; ++row) {
         for (int col = 0; col < BOARD_SIZE; ++col) {
             if (board[row][col] != player) {
-                goto next_row;
+                goto next_row;  // goto statement is used to jump to a label (directly goes to line 49, escaping the inner for loop)
             }
         }
-        return 1;
+        return 1;  // ***Once return statement is executed, the function is terminated
     next_row:
     }
 
@@ -77,16 +77,16 @@ player_t other_player(player_t player)
     switch (player) {
     case 'X': return 'O';
     case 'O': return 'X';
-    default: assert(0);
+    default: assert(0);  // assert() is used to check if the condition is true or not. If it is false, the program is terminated with an error message
     }
 }
 
-typedef struct {
+typedef struct {  // struct is used to create a new data type (like int, char, etc.) and as mentioned above also, typedef is used to give a new name to the data type
     int row;
     int col;
     /* -1 for a loss, 0 for a draw, 1 for a win. */
     int score;
-} move_t;
+} move_t;  // move_t is a new data type
 
 #define MAX_ORD (43046720)
 
@@ -163,7 +163,7 @@ move_t best_move(board_t board, player_t player)
                 board[row][col] = player;
                 if (has_won(board, player)) {
                     board[row][col] = '.';
-                    return (move_t) {
+                    return (move_t) { // ***Once return statement is executed, the function is terminated
                         row,
                         col,
                         1
@@ -180,7 +180,7 @@ move_t best_move(board_t board, player_t player)
                 board[row][col] = player;
                 if (is_full(board)) {
                     board[row][col] = '.';
-                    return (move_t) {
+                    return (move_t) {  // ***Once return statement is executed, the function is terminated
                         .row = row,
                         .col = col,
                         .score = 0
@@ -189,7 +189,7 @@ move_t best_move(board_t board, player_t player)
                 response = best_move(board, other_player(player));
                 board[row][col] = '.';
                 if (response.score == -1) {
-                    return (move_t) {
+                    return (move_t) {  // ***Once return statement is executed, the function is terminated
                         .row = row,
                         .col = col,
                         .score = 1
@@ -282,7 +282,7 @@ int main()
             printf("Draw.\n");
             break;
         }
-        current = other_player(current);
+        current = other_player(current);  // changes the player
     }
 
     return 0;
