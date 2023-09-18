@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "test.h"
+// #include "test.h"
 
 
 /*
@@ -10,22 +10,42 @@
  * Selections should be generated in lexicographic order.
  * a[0..k-1] is the smallest selection and a[n-k..n-1] is the largest.
  */
-int generate_selections(int a[], int n, int k, int b[], void *data, void (*process_selection)(int *b, int k, void *data))
+void sort(int a[], int n)
 {
-    for (int j = 0; j <= n; j++)
-        for (int i = j; i < j + k; i++)
-            b[i] = a[i];
-        process_selection(b, k, data);
-
+    int i, j, temp;
+    for (i = 0; i < n; i++){
+        for (j = i+1; j < n; j++){
+            if (a[i] > a[j]){
+                temp = a[i];
+                a[i] = a[j];
+                a[j] = temp;
+            }
+        }
+    }
 }
 
-int process_selection(int *b, int k, void *data)
+void process_selection(int b, int k)
 {
     int i;
-    for (i = 0; i < k; i++)
+    sort(b);
+    printf("Selection: ");
+    for (i = 0; i < k; i++){
         printf("%d ", b[i]);
+    }
     printf("\n");
 }
+
+void generate_selections(int a[], int n, int k, int b[], void (process_selection)(int b, int k)){
+    for (int i = 0; i < k-1; i++){
+        b[i] = a[i+j];
+        for (int j = k-1; j <= n; j++){
+            b[k-1] = a[j];
+            process_selection(b, k);
+    }
+    return 0;
+    }
+}
+
 
 /*
  * See Exercise 2 (a), page 94 in Jeff Erickson's textbook.
@@ -47,11 +67,11 @@ void previous_permutation(int a[], int n)
 
 /* Write your tests here. Use the previous assignment for reference. */
 
-int main()
+void main()
 {
     int a[] = {1, 2, 3, 4};
     int b[3];
-    return generate_selections(a, 4, 3, b, NULL, process_selection);
+    generate_selections(a, 4, 3, b, int (process_selection)(int b, int k));
 
-    //return 0;
+    return 0;
 }
