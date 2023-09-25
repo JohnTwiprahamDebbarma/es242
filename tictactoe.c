@@ -86,6 +86,7 @@ typedef struct {  // struct is used to create a new data type (like int, char, e
     int col;
     /* -1 for a loss, 0 for a draw, 1 for a win. */
     int score;
+    
 } move_t;  // move_t is a new data type
 
 #define MAX_ORD (43046720)
