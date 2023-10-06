@@ -243,9 +243,9 @@
 
 
 
-#define ROWS 6
-#define COLS 7
-#define MAX_DEPTH 5
+#define ROWS 4
+#define COLS 5
+#define MAX_DEPTH 20
 
 char board[ROWS][COLS];
 
