@@ -23,12 +23,11 @@ enum {
 typedef char player_t;
 typedef char board_t[BOARD_SIZE];
 
-void init_board(board_t board)
-{
+void init_board(board_t board) {
     for (int line = 0; line < BOARD_SIZE; ++line) {
             board[line] = '.';
-        }
     }
+}
 
 
 void print_board(board_t board)
@@ -84,15 +83,18 @@ player_t other_player(player_t player)
 bool has_won(board_t board, player_t player)
 {
     bool losable_edges=true;
+//    bool loss = has_lost(board, player);
     player_t op = other_player(player);
     for (int line = 0; line < BOARD_SIZE; ++line) {
         if (board[line] == '.'){
-            board[line] == player;
-            if (!(has_lost(board, op))){
-                losable_edges=false;}
+            board[line] == op;
+            if (!has_lost(board, op)){
+                losable_edges=false;
+            board[line] == '.';}
             }
+    board[line] == '.';
     }
-    return losable_edges;
+    return false;
 }
 
 typedef struct {
@@ -117,7 +119,7 @@ uint8_t encode_move(move_t m)
     case 1: b |= 1 << 4; break;
     }
 
-    return b;
+    return 0;
 }
 
 move_t decode_move(uint8_t b)
@@ -127,7 +129,7 @@ move_t decode_move(uint8_t b)
     if (b & 0x10) m.score = 1;
     if (b & 0x20) m.score = 0;
     if (b & 0x40) m.score = -1;
-    return m;
+    return (move_t){0, 0};
 }
 
 int ord1(board_t board)
@@ -146,7 +148,7 @@ int ord1(board_t board)
             p *= 3;
     }
 
-    return i;
+    return 0;
 }
 
 /*
@@ -156,18 +158,14 @@ move_t best_move1(board_t board, player_t player)
 {
     move_t response;
     move_t candidate;
-    int no_candidate = 1;
+    bool no_candidate = true;
 
     int o = ord1(board);
-
-    if (computed_moves[o]) {
-        return decode_move(computed_moves[o]);
-    }
 
     for (int line = 0; line < BOARD_SIZE; ++line) {
             if (board[line] == '.') {
                 board[line] = player;
-                if (has_won(board, player)) {
+                if (has_won(board, player) && (!has_lost(board, player))) {
                     board[line] = '.';
                     computed_moves[o] = encode_move(candidate = (move_t) {
                         .line = line,
@@ -182,14 +180,6 @@ move_t best_move1(board_t board, player_t player)
     for (int line = 0; line < BOARD_SIZE; ++line) {
             if (board[line] == '.') {
                 board[line] = player;
-                if (is_full(board)) {
-                    board[line] = '.';
-                    computed_moves[o] = encode_move(candidate = (move_t) {
-                        .line = line,
-                        .score = 0
-                        });
-                    return candidate;
-                }
                 response = best_move1(board, other_player(player));
                 board[line] = '.';
                 if (response.score == -1) {
@@ -198,25 +188,22 @@ move_t best_move1(board_t board, player_t player)
                         .score = 1
                         });
                     return candidate;
-                } else if (response.score == 0) {
-                    candidate = (move_t) {
+                }}}
+    for (int line = 0; line < BOARD_SIZE; ++line) {
+            if (board[line] == '.') {
+                board[line] = player;
+                response = best_move1(board, other_player(player));
+                board[line] = '.';
+                if (response.score == 1) {
+                        computed_moves[o] = encode_move(candidate = (move_t) {
                         .line = line,
-                        .score = 0
-                    };
-                    no_candidate = 0;
-                } else { /* response.score == +1 */
-                    if (no_candidate) {
-                        candidate = (move_t) {
-                            .line = line,
-                            .score = -1
-                        };
-                        no_candidate = 0;
-                    }
+                        .score = -1
+                        });
+                    return candidate;
                 }
             }
     }
-    computed_moves[o] = encode_move(candidate);
-    return candidate;
+return (move_t){0, 0};
 }
 
 
@@ -240,7 +227,7 @@ int ord2(board_t board)
             p *= 3;
     }
 
-    return i;
+    return 0;
 }
 
 /*
@@ -250,71 +237,72 @@ move_t best_move2(board_t board, player_t player)
 {
     move_t response;
     move_t candidate;
-    int no_candidate = 1;
+    bool no_candidate = true;
 
     int o = ord2(board);
 
-    if (computed_moves[o]) {
-        return decode_move(computed_moves[o]);
+    // If the board is empty, return the center column
+    if (o == 0) {
+        computed_moves[o] = encode_move(candidate = (move_t) {
+            .line = BOARD_SIZE / 2,
+            .score = 1
+        });
+        return candidate;
     }
 
     for (int line = 0; line < BOARD_SIZE; ++line) {
-            if (board[line] == '.') {
-                board[line] = player;
-                if (has_won(board, player)) {
-                    board[line] = '.';
-                    computed_moves[o] = encode_move(candidate = (move_t) {
-                        .line = line,
-                        .score = 1
-                        });
-                    return candidate;
-                }
+        if (board[line] == '.') {
+            board[line] = player;
+            if (has_won(board, player) && (!has_lost(board, player))) {
                 board[line] = '.';
+                computed_moves[o] = encode_move(candidate = (move_t) {
+                    .line = line,
+                    .score = 1
+                });
+                return candidate;
             }
+            board[line] = '.';
+        }
     }
 
     for (int line = 0; line < BOARD_SIZE; ++line) {
-            if (board[line] == '.') {
-                board[line] = player;
-                if (is_full(board)) {
-                    board[line] = '.';
-                    computed_moves[o] = encode_move(candidate = (move_t) {
-                        .line = line,
-                        .score = 0
-                        });
-                    return candidate;
-                }
-                response = best_move2(board, other_player(player));
-                board[line] = '.';
-                if (response.score == -1) {
-                    computed_moves[o] = encode_move(candidate = (move_t) {
-                        .line = line,
-                        .score = 1
-                        });
-                    return candidate;
-                } else if (response.score == 0) {
-                    candidate = (move_t) {
-                        .line = line,
-                        .score = 0
-                    };
-                    no_candidate = 0;
-                } else { /* response.score == +1 */
-                    if (no_candidate) {
-                        candidate = (move_t) {
-                            .line = line,
-                            .score = -1
-                        };
-                        no_candidate = 0;
-                    }
-                }
+        if (board[line] == '.') {
+            board[line] = player;
+            response = best_move2(board, other_player(player));
+            board[line] = '.';
+            if (response.score == -1) {
+                computed_moves[o] = encode_move(candidate = (move_t) {
+                    .line = line,
+                    .score = 1
+                });
+                return candidate;
             }
+        }
     }
-    computed_moves[o] = encode_move(candidate);
+
+    for (int line = 0; line < BOARD_SIZE; ++line) {
+        if (board[line] == '.') {
+            board[line] = player;
+            response = best_move2(board, other_player(player));
+            board[line] = '.';
+            if (response.score == 1) {
+                computed_moves[o] = encode_move(candidate = (move_t) {
+                    .line = line,
+                    .score = -1
+                });
+                return candidate;
+            }
+        }
+    }
+
+    // If no winning move or blocking move is found, return the center column
+    computed_moves[o] = encode_move(candidate = (move_t) {
+        .line = BOARD_SIZE / 2,
+        .score = 0
+    });
     return candidate;
+return (move_t){0, 0};
 }
-
-
-
 
 
 void print_key()
@@ -354,6 +342,7 @@ int main()
         } else {
             printf("Computer's Move.......\n");
             response = best_move1(board, current);
+//            if (board[response.line]!='.'){printf("\nThe Computer Lost - No More Moves Left\n");}
             board[response.line] = current;
         }
         if (has_won(board, current)) {
@@ -405,7 +394,6 @@ else{
         print_board(board);
         print_key();
         printf("\n\n");
-
         if (current == 'B') {
             printf("Enter your move: ");
             scanf("%d", &move);
@@ -417,7 +405,8 @@ else{
             board[line] = current;
         } else {
             printf("Computer's Move.......\n");
-            response = best_move2(board, current);
+            response = best_move1(board, current);
+            //if (board[response.line]!='.'){printf("\nThe Computer Lost - No More Moves Left\n");}
             board[response.line] = current;
         }
         if (has_won(board, current)) {
@@ -425,36 +414,34 @@ else{
             print_key();
             printf("\n\n");
 //            printf("Player %c has won!\n", current);
-//            printf("Computer was R and you are B");
-            if (current=='R'){
-                printf("Sadly, You Have Lost\nComputer Has Won");
-            }
-            else if(current=='B'){
-                printf("Congartulations, You Have Won\nComputer Has Lost");
-            }
-            else{
-                printf("SOME ERROR IS THERE");
-            }
-            break;}
-
-        else if (has_lost(board, current)){
-            print_board(board);
-            print_key();
-            printf("\n\n");
-//            printf("Player %c has lost!\n", current);
-//            printf("Computer was R and you are B");
-            if (current=='R'){
+//            printf("Computer was B and you are R");
+            if (current=='B'){
                 printf("Congratulations, You Have Won\nComputer Has Lost");
             }
-            else if(current=='B'){
+            else if(current=='R'){
                 printf("Sadly, You Have Lost\nComputer Has Won");
             }
             else{
                 printf("SOME ERROR IS THERE");
             }
+            break;
+        }
+        else if (has_lost(board, current)){
+            print_board(board);
+            printf("\n\n");
+//            printf("Player %c has lost!\n", current);
+//            printf("Computer was B and you are R");
+            if (current=='B'){
+                printf("Sadly, You Have Lost\nComputer Has Won");
+            }
+            else if(current=='R'){
+                printf("Congratulations, You Have Won\nComputer Has Lost");
+            }
+            else{
+                printf("SOME ERROR IS THERE");
+            }
             break;}
-
-        else if (is_full(board)) {
+         else if (is_full(board)) {
             print_board(board);
             printf("\n\n");
             printf("Draw.\n");

@@ -158,123 +158,74 @@ int ord1(board_t board)
 move_t best_move1(board_t board, player_t player)
 {
     move_t response;
-    move_t candidate = {0};
+    move_t candidate;
     bool no_candidate = true;
 
     int o = ord1(board);
 
     for (int line = 0; line < BOARD_SIZE; ++line) {
-        if (board[line] != 'R' && board[line] != 'B' && board[line] == '.') {
-            board[line] = player;
-            if (has_won(board, player) && (!has_lost(board, player))) {
-                board[line] = '.';
-                computed_moves[o] = encode_move(candidate = (move_t) {
-                    .line = line,
-                    .score = 1
-                });
-                assert(board[candidate.line] == '.');
-                return candidate;
-            }
-            board[line] = '.';
-        }
-    }
-
-    for (int line = 0; line < BOARD_SIZE; ++line) {
-        if (board[line] != 'R' && board[line] != 'B' && board[line] == '.') {
-            board[line] = player;
-            response = best_move1(board, other_player(player));
-            board[line] = '.';
-            if (response.score == -1) {
+            if (board[line] != 'R' || board[line] != 'B'){
+            if (board[line] == '.') {
                 board[line] = player;
-                candidate = (move_t) {
-                    .line = line,
-                    .score = 1
-                };
-                if (board[candidate.line] == '.') {
-                    computed_moves[o] = encode_move(candidate);
-                    assert(board[candidate.line] == '.');
+                if (has_won(board, player) && (!has_lost(board, player))) {
                     board[line] = '.';
+                    computed_moves[o] = encode_move(candidate = (move_t) {
+                        .line = line,
+                        .score = 1
+                        });
+//                    printf("1AAAA");
+                    assert (board[candidate.line] == '.');
+//                    printf("A%d", candidate.line);
                     return candidate;
                 }
-                board[line] = '.';
+                 if (board[line] != '.') {board[line] = '.';}
             }
-        }
+    }
     }
 
     for (int line = 0; line < BOARD_SIZE; ++line) {
-        if (board[line] != 'R' && board[line] != 'B' && board[line] == '.') {
-            board[line] = other_player(player);
-            if (has_won(board, other_player(player)) && (!has_lost(board, other_player(player)))) {
+            if (board[line] != 'R' || board[line] != 'B'){
+            if (board[line] == '.') {
                 board[line] = player;
-                candidate = (move_t) {
-                    .line = line,
-                    .score = 1
-                };
-                if (board[candidate.line] == '.') {
-                    computed_moves[o] = encode_move(candidate);
-                    assert(board[candidate.line] == '.');
-                    board[line] = '.';
-                    return candidate;
-                }
+                response = best_move1(board, other_player(player));
                 board[line] = '.';
-            }
-            board[line] = '.';
-        }
-    }
-
+                if (response.score == -1) {
+                    if (board[line]=='.'){
+                    computed_moves[o] = encode_move(candidate = (move_t) {
+                        .line = line,
+                        .score = 1});};
+//                    printf("2BBBB");
+                    assert (board[candidate.line] == '.');
+//                   printf("B%d", candidate.line);
+                 if (board[line] != '.') {board[line] = '.';}
+                    return candidate;
+                }}}}
     for (int line = 0; line < BOARD_SIZE; ++line) {
-        if (board[line] != 'R' && board[line] != 'B' && board[line] == '.') {
-            board[line] = other_player(player);
-            response = best_move1(board, player);
-            board[line] = '.';
-            if (response.score == 1) {
+            if (board[line] != 'R' || board[line] != 'B'){
+            if (board[line] == '.') {
                 board[line] = player;
-                candidate = (move_t) {
-                    .line = line,
-                    .score = -1
-                };
-                if (board[candidate.line] == '.') {
-                    computed_moves[o] = encode_move(candidate);
-                    assert(board[candidate.line] == '.');
-                    board[line] = '.';
-                    return candidate;
-                }
+                response = best_move1(board, other_player(player));
                 board[line] = '.';
+                if (response.score == 1) {
+                        if (board[line]=='.'){
+                        computed_moves[o] = encode_move(candidate = (move_t) {
+                        .line = line,
+                        .score = -1
+                        });
+                    assert (board[candidate.line] == '.');
+//                    printf("C%d", candidate.line);
+                    return candidate;
+                }}
             }
-        }
     }
-
-    // If no winning move or blocking move is found, return the center column
-    candidate = (move_t) {
-        .line = BOARD_SIZE / 2,
-        .score = 0
-    };
-    if (board[candidate.line] == '.') {
-        computed_moves[o] = encode_move(candidate);
-        assert(board[candidate.line] == '.');
-        return candidate;
     }
-    // If the center column is not empty, find the first empty column and return it
-    for (int line = 0; line < BOARD_SIZE; ++line) {
-        if (board[line] == '.') {
-            candidate = (move_t) {
-                .line = line,
-                .score = 0
-            };
-            computed_moves[o] = encode_move(candidate);
-            assert(board[candidate.line] == '.');
-            return candidate;
-        }
-    }
-
-    // If all columns are full, return an invalid move
-    candidate = (move_t) {
-        .line = -1,
-        .score = 0
-    };
-    computed_moves[o] = encode_move(candidate);
-    return candidate;
+//    printf("I am not returning");
 }
+
+
+
+
+
 
 int ord2(board_t board)
 {
